@@ -1,5 +1,5 @@
 To activate virtual environment: \
-cd backend
+cd backend \
 source venv/bin/activate
 
 To run app: \
