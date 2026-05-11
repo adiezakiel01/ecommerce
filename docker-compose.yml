@@ -6,7 +6,7 @@ services:
         POSTGRES_PASSWORD: analytics_dev
         POSTGRES_DB: ecommerce_analytics
       ports:
-        - "5432:5432"     # localhost : container
+        - "5433:5432"     # localhost : container
       volumes:
         # Persists data between restarts.
         - postgres_data:/var/lib/postgresql/data
