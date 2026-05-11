@@ -1,28 +1,28 @@
 version: "3.9"
 
 services:
-db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: analytics
-      POSTGRES_PASSWORD: analytics_dev
-      POSTGRES_DB: ecommerce_analytics
-    ports:
-      - "5432:5432"     # localhost : container
-    volumes:
-      # Persists data between restarts.
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U analytics"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  db:
+      image: postgres:15-alpine
+      environment:
+        POSTGRES_USER: analytics
+        POSTGRES_PASSWORD: analytics_dev
+        POSTGRES_DB: ecommerce_analytics
+      ports:
+        - "5432:5432"     # localhost : container
+      volumes:
+        # Persists data between restarts.
+        - postgres_data:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U analytics"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
 
-redis:
-  # In-memory store — used for caching and background job queues.
-  image: redis:7-alpine
-  ports:
-    - "6379:6379"
+  redis:
+    # In-memory store — used for caching and background job queues.
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
 
 volumes:
   # Persistent storage for PostgreSQL data.
