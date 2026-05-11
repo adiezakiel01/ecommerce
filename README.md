@@ -1,6 +1,6 @@
-To activate virtual environment: /ln
+To activate virtual environment: \
 cd backend
 source venv/bin/activate
 
-To run app: /ln
+To run app: \
 uvicorn app.main:app --reload
