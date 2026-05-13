@@ -22,9 +22,10 @@ class Settings(BaseSettings):
     # This tells pydantic-settings to look for a .env file
     # SettingsConfigDict replaces the old class Config approach
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-    )
+    env_file="../.env",
+    env_file_encoding="utf-8",
+    extra="ignore",    # ignore .env values not defined in this class
+)
 
 
 # lru_cache means this function only runs once — the Settings object is created once and reused everywhere in the app.
