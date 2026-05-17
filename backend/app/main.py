@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.core.database import engine # Import the database engine to ensure models are registered
 from app.models.base import Base # Import the Base class to create tables
+from app.models import ecom # Import the ecom models to ensure they are registered with SQLAlchemy
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
