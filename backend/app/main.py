@@ -19,6 +19,7 @@ app = FastAPI(
     title="E-Commerce Analytics API",
     description="AI-powered analytics for e-commerce businesses",
     version="1.0.0",
+    lifespan=lifespan,  # Use the lifespan function to manage startup/shutdown events
 )
 
 @app.get("/")
