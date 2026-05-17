@@ -1,4 +1,18 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from app.core.database import engine # Import the database engine to ensure models are registered
+from app.models.base import Base # Import the Base class to create tables
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # STARTUP — runs before the server accepts requests, creates all tables that don't exist yet
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    print("✅ Database connected — tables ready")
+    yield
+    # SHUTDOWN — runs when server stops
+    await engine.dispose()
+    print("🔌 Database connection closed")
 
 app = FastAPI(
     title="E-Commerce Analytics API",
