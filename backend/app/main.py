@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from app.core.database import engine # Import the database engine to ensure models are registered
 from app.models.base import Base # Import the Base class to create tables
 from app.models import ecom # Import the ecom models to ensure they are registered with SQLAlchemy
+from app.api.v1.router import api_router # Import the API router to include in the app
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +22,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,  # Use the lifespan function to manage startup/shutdown events
 )
+
+app.include_router(api_router, prefix="/api/v1")  # Include the API router with a versioned prefix
 
 @app.get("/")
 async def root():
