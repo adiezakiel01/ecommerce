@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export const apiClient = axios.create({
-    baseURL: '${API_BASE}/api/v1',
-    timeout: 30000,  // 30 seconds  
+    baseURL: `${API_BASE}/api/v1`,
+    timeout: 30000,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -22,17 +22,17 @@ export interface RevenueSummary {
     current: {
         revenue: number;
         order_count: number;
-        aov: number;
+        avg_order_value: number;
     };
     previous: {
         revenue: number;
         order_count: number;
-        aov: number;
+        avg_order_value: number;
     };
     changes: {
-        revenue: number | null;  // null if previous is zero
-        order_count: number | null;
-        aov: number | null;
+        revenue_pct: number | null;  // null if previous is zero
+        order_count_pct: number | null;
+        avg_order_value_pct: number | null;
     };
 }
 

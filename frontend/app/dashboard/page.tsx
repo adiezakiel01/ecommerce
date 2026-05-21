@@ -78,17 +78,17 @@ export default function DashboardPage() {
                     <KpiCard
                         title="Total Revenue"
                         value={`$${summary.current.revenue.toLocaleString()}`}
-                        change={summary.changes.revenue}
+                        change={summary.changes.revenue_pct}
                     />
                     <KpiCard
                         title="Total Orders"
                         value={summary.current.order_count.toLocaleString()}
-                        change={summary.changes.order_count}
+                        change={summary.changes.order_count_pct}
                     />
                     <KpiCard
                         title="Avg Order Value"
-                        value={`$${summary.current.aov.toFixed(2)}`}
-                        change={summary.changes.aov}
+                        value={`$${summary.current.avg_order_value.toFixed(2)}`}
+                        change={summary.changes.avg_order_value_pct}
                     />
                 </div>
             )}
