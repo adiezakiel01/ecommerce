@@ -44,7 +44,7 @@ export default function RootLayout({
                   <aside className="w-56 bg-white border-r border-gray-200 flex flex-col">
                       <div className="h-14 flex items-center px-5 border-b border-gray-200">
                           <span className="font-semibold text-gray-900">
-                              Analytics AI
+                              Ecom Analytics
                           </span>
                       </div>
 

@@ -3,7 +3,8 @@ from contextlib import asynccontextmanager
 from app.core.database import engine # Import the database engine to ensure models are registered
 from app.models.base import Base # Import the Base class to create tables
 from app.models import ecom # Import the ecom models to ensure they are registered with SQLAlchemy
-from app.api.v1.router import api_router # Import the API router to include in the app
+from app.api.v1.router import api_router # Import the API router to include in the 
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +22,14 @@ app = FastAPI(
     description="AI-powered analytics for e-commerce businesses",
     version="1.0.0",
     lifespan=lifespan,  # Use the lifespan function to manage startup/shutdown events
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(api_router, prefix="/api/v1")  # Include the API router with a versioned prefix
