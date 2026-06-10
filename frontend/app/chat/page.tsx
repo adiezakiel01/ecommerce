@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { chatApi, ChatMessage } from "@/lib/api";
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+    BarChart, Bar, LineChart, Line, XAxis, YAxis,
+    CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 
 export default function ChatPage() {
@@ -132,6 +133,33 @@ export default function ChatPage() {
                                                 radius={[3, 3, 0, 0]}
                                             />
                                         </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            )}
+
+                            {/* Line chart */}
+                            {msg.data && msg.chart_type === "line" && msg.data.length > 0 && (
+                                <div className="mt-3">
+                                    <ResponsiveContainer width="100%" height={200}>
+                                        <LineChart data={msg.data}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                            <XAxis
+                                                dataKey={Object.keys(msg.data[0])[0]}
+                                                tick={{ fontSize: 10 }}
+                                                tickFormatter={(v: string) =>
+                                                    typeof v === "string" ? v.slice(0, 7) : v
+                                                }
+                                            />
+                                            <YAxis tick={{ fontSize: 10 }} />
+                                            <Tooltip />
+                                            <Line
+                                                type="monotone"
+                                                dataKey={Object.keys(msg.data[0])[1]}
+                                                stroke="#7c3aed"
+                                                strokeWidth={2}
+                                                dot={false}
+                                            />
+                                        </LineChart>
                                     </ResponsiveContainer>
                                 </div>
                             )}

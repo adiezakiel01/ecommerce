@@ -73,9 +73,11 @@ RULES:
 5. Always use clear column aliases
 
 IMPORTANT COLUMN RULES:
+- orders table date column is called: created_at (NOT order_date, NOT date, NOT order_time)
+- orders table revenue column is called: total_amount (NOT total, NOT amount, NOT revenue)
 - For product revenue: use SUM(oi.total_price) — never oi.price or oi.quantity * oi.price
-- For order revenue: use orders.total_amount — never orders.total
 - Always join order_items → orders → products for product revenue queries
+- customers table has created_at for registration date
 
 RESPONSE FORMAT — always respond with valid JSON only, no markdown, no ```json blocks, no explanation outside the JSON.
 Just the raw JSON object:
