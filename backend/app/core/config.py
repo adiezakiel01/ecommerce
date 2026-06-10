@@ -18,6 +18,7 @@ class Settings(BaseSettings):
 
     # ── OpenAI (Week 4) ───────────────────────────────────────────────
     OPENAI_API_KEY: str = ""
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
 
     # This tells pydantic-settings to look for a .env file
     # SettingsConfigDict replaces the old class Config approach

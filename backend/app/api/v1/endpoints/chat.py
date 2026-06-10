@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from langchain_openai import ChatOpenAI
+#from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
 from langchain.schema import HumanMessage, SystemMessage
 
 from app.core.config import settings
@@ -71,7 +72,13 @@ RULES:
 4. Limit results to 20 rows unless asked for more
 5. Always use clear column aliases
 
-RESPONSE FORMAT — always respond with valid JSON only, no markdown:
+IMPORTANT COLUMN RULES:
+- For product revenue: use SUM(oi.total_price) — never oi.price or oi.quantity * oi.price
+- For order revenue: use orders.total_amount — never orders.total
+- Always join order_items → orders → products for product revenue queries
+
+RESPONSE FORMAT — always respond with valid JSON only, no markdown, no ```json blocks, no explanation outside the JSON.
+Just the raw JSON object:
 {
     "sql": "SELECT ... (or null if no SQL needed)",
     "explanation": "Clear answer in 2-3 sentences",
@@ -87,11 +94,11 @@ async def chat_message(
     Accepts a natural language question and returns an AI-generated insight, optionally with a SQL query and data for charting.
     """
 
-    if not settings.OPENAI_API_KEY:
-        raise HTTPException(status_code=503, detail="OpenAI API key not configured")
+    #if not settings.OPENAI_API_KEY:
+      #  raise HTTPException(status_code=503, detail="OpenAI API key not configured")
     
-    llm = ChatOpenAI(model="gpt-4", temperature=0, openai_api_key=settings.OPENAI_API_KEY, max_tokens=1000)
-
+    #llm = ChatOpenAI(model="gpt-4o", temperature=0, openai_api_key=settings.OPENAI_API_KEY, max_tokens=1000)
+    llm = ChatOllama(model="qwen3.5:9b", temperature=0, base_url=settings.OLLAMA_BASE_URL)
     messages = [SystemMessage(content=SYSTEM_PROMPT)]
 
     for turn in (request.history or [])[-6:]:
@@ -107,6 +114,9 @@ async def chat_message(
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"OpenAI error: {str(e)}")
     
+    import re
+    raw_clean = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL).strip()
+
     clean = raw.strip()
     if clean.startswith("```"):
         lines = clean.split("\n")
@@ -128,7 +138,12 @@ async def chat_message(
             result = await db.execute(text(sql))
             columns = list(result.keys())
             rows = result.fetchmany(20)
-            query_data = [dict(zip(columns, rows)) for row in rows]
+            #query_data = [dict(zip(columns, rows)) for row in rows]
+            query_data = [
+                {k: float(v) if hasattr(v, '__float__') and not isinstance(v, (int, str, bool, type(None))) else v
+                for k, v in row._mapping.items()}
+                for row in rows
+            ]
         except Exception as e:
             explanation += f" \n\n(Query error: {str(e)[:150]})"
 
