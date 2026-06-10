@@ -70,3 +70,37 @@ export const productsApi = {
         return response.data.data;
     }
 };
+
+export interface ChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
+    sql_query?: string;
+    data?: Record<string, unknown>[];
+    chart_type?: string;
+}
+
+export interface ChatApiResponse {
+    message: string;
+    sql_query?: string;
+    data?: Record<string, unknown>[];
+    chart_type?: string;
+}
+
+export const chatApi = {
+    sendMessage: async (
+        message: string,
+        history: { role: string; content: string }[] = []
+    )
+        : Promise<ChatApiResponse> => {
+        const response = await apiClient.post('/chat/message', {
+            message,
+            history,
+        });
+        return response.data;
+    },
+
+    getSuggestions: async (): Promise<string[]> => {
+        const response = await apiClient.get('/chat/suggestions');
+        return response.data.suggestions;
+    },
+};
