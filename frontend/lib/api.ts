@@ -40,8 +40,8 @@ export interface Product {
     id: string;
     sku: string;
     name: string;
-    price: number;
-    cost: number;
+    price: string;
+    cost: string;
     is_active: boolean;
     stock_qty: number;
 }
@@ -67,7 +67,7 @@ export const productsApi = {
         const response = await apiClient.get('/products', {
             params: { skip, limit },
         });
-        return response.data.data;
+        return response.data;
     }
 };
 
