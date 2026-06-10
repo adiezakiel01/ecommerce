@@ -50,7 +50,8 @@ export default function ChatPage() {
                     chart_type: response.chart_type ?? undefined,
                 },
             ]);
-        } catch {
+        } catch (err) {
+            console.error("Chat error:", err); 
             setMessages((prev) => [
                 ...prev,
                 {
