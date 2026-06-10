@@ -78,3 +78,77 @@ RESPONSE FORMAT — always respond with valid JSON only, no markdown:
     "chart_type": "bar or line or table or none"
 }
 """
+@router.post("/message", response_model=ChatResponse)
+async def chat_message(
+    request: ChatRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Accepts a natural language question and returns an AI-generated insight, optionally with a SQL query and data for charting.
+    """
+
+    if not settings.OPENAI_API_KEY:
+        raise HTTPException(status_code=503, detail="OpenAI API key not configured")
+    
+    llm = ChatOpenAI(model="gpt-4", temperature=0, openai_api_key=settings.OPENAI_API_KEY, max_tokens=1000)
+
+    messages = [SystemMessage(content=SYSTEM_PROMPT)]
+
+    for turn in (request.history or [])[-6:]:
+        if turn.get("role") == "user":
+            messages.append(HumanMessage(content=turn["content"]))
+        else:
+            messages.append(SystemMessage(content=turn["content"]))
+    messages.append(HumanMessage(content=request.message))
+
+    try:
+        response = await llm.ainvoke(messages)
+        raw = response.content
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"OpenAI error: {str(e)}")
+    
+    clean = raw.strip()
+    if clean.startswith("```"):
+        lines = clean.split("\n")
+        clean = "\n".join(lines[1:-1])
+    
+    try:
+        parsed = json.loads(clean)
+    except json.JSONDecodeError:
+
+        return ChatResponse(message=raw)
+    sql = parsed.get("sql")
+    explanation = parsed.get("explanation", "")
+    chart_type = parsed.get("chart_type", "none")
+
+    query_data = None
+
+    if sql and sql.lower().startswith("select"):
+        try:
+            result = await db.execute(text(sql))
+            columns = list(result.keys())
+            rows = result.fetchmany(20)
+            query_data = [dict(zip(columns, rows)) for row in rows]
+        except Exception as e:
+            explanation += f" \n\n(Query error: {str(e)[:150]})"
+
+    return ChatResponse(
+        message=explanation,
+        sql_query=sql,
+        data=query_data,
+        chart_type=chart_type if chart_type != "none" else None,
+    )
+
+@router.get("/suggestions")
+async def get_suggestions():
+    """Returns example questions shown in the chat UI."""
+    return {
+        "suggestions": [
+            "What were my top 5 products by revenue last month?",
+            "How many new customers did I get this week?",
+            "What is my average order value by month?",
+            "Which day of the week has the highest revenue?",
+            "What products are low on stock?",
+            "Compare revenue this month vs last month",
+        ]
+    }
