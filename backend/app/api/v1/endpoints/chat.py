@@ -100,7 +100,7 @@ async def chat_message(
       #  raise HTTPException(status_code=503, detail="OpenAI API key not configured")
     
     #llm = ChatOpenAI(model="gpt-4o", temperature=0, openai_api_key=settings.OPENAI_API_KEY, max_tokens=1000)
-    llm = ChatOllama(model="qwen3.5:9b", temperature=0, base_url=settings.OLLAMA_BASE_URL)
+    llm = ChatOllama(model="qwen2.5-coder:7b", temperature=0, base_url=settings.OLLAMA_BASE_URL)
     messages = [SystemMessage(content=SYSTEM_PROMPT)]
 
     for turn in (request.history or [])[-6:]:
