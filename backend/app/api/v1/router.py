@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints.products import router as products_router
 from app.api.v1.endpoints.analytics import router as analytics_router
 from app.api.v1.endpoints.chat import router as chat_router
+from app.api.v1.endpoints.forecasting import router as forecasting_router
 
 api_router = APIRouter()
 
@@ -14,3 +15,5 @@ api_router.include_router(
     prefix="/chat",
     tags=["AI chat"],
 )
+
+api_router.include_router(forecasting_router, prefix="/forecasting", tags=["forecasting"])
