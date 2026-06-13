@@ -104,3 +104,41 @@ export const chatApi = {
         return response.data.suggestions;
     },
 };
+
+export interface ForecastPoint {
+    date: string;
+    value?: number;
+    lower?: number;
+    upper?: number;
+    actual?: number;
+}
+
+export interface ForecastResponse {
+    forecast_days: number;
+    history_days: number;
+    historical: {
+        date: string;
+        actual: number;
+    } [];
+    fitted: ForecastPoint[];
+    forecast: ForecastPoint[];
+    model_info: {
+        training_samples: number;
+        seasonalities: string[];
+    };
+}
+
+export const forecastApi = {
+    getRevenueForecast: async (
+        forecast_days = 30,
+        history_days = 365
+    ): Promise<ForecastResponse> => {
+        const response = await apiClient.get('/forecast/revenue', {
+            params: { 
+                forecast_days: forecast_days, 
+                history_days: history_days 
+            },
+        });
+        return response.data;
+    },
+};
