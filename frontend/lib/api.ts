@@ -133,7 +133,7 @@ export const forecastApi = {
         forecast_days = 30,
         history_days = 365
     ): Promise<ForecastResponse> => {
-        const response = await apiClient.get('/forecast/revenue', {
+        const response = await apiClient.get('/forecasting/revenue', {
             params: { 
                 forecast_days: forecast_days, 
                 history_days: history_days 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {
     ComposedChart, Line, Area, XAxis, YAxis,
-    CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+    CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { forecastApi, ForecastResponse } from "@/lib/api";
 
@@ -132,13 +132,36 @@ export default function ForecastingPage() {
 
             {/* Main forecast chart */}
             <div className="bg-white rounded-xl border border-gray-200 p-5">
-                <h2 className="text-sm font-medium text-gray-700 mb-1">
-                    Actual vs Forecast
-                </h2>
-                <p className="text-xs text-gray-400 mb-4">
-                    Solid line = actual revenue · Dashed line = forecast ·
-                    Shaded area = 80% confidence interval
-                </p>
+            <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium text-gray-700">
+                Actual vs Forecast
+            </h2>
+            {/* Custom legend */}
+            <div className="flex items-center gap-5">
+                <div className="flex items-center gap-2">
+                    <svg width="24" height="12">
+                        <line x1="0" y1="6" x2="24" y2="6"
+                            stroke="#7c3aed" strokeWidth="2"/>
+                    </svg>
+                    <span className="text-xs text-gray-500">Actual revenue</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <svg width="24" height="12">
+                        <line x1="0" y1="6" x2="24" y2="6"
+                            stroke="#7c3aed" strokeWidth="2"
+                            strokeDasharray="6 3"/>
+                    </svg>
+                    <span className="text-xs text-gray-500">Forecast</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-3 rounded-sm bg-violet-100 border border-violet-200"/>
+                    <span className="text-xs text-gray-500">80% confidence</span>
+                </div>
+            </div>
+        </div>
+        <p className="text-xs text-gray-400 mb-4">
+            Shaded area = 80% confidence interval
+        </p>
 
                 <ResponsiveContainer width="100%" height={380}>
                     <ComposedChart data={chartData}>
@@ -158,7 +181,7 @@ export default function ForecastingPage() {
                                 String(name),
                             ]}
                         />
-                        <Legend />
+                        
 
                         {/* Confidence interval — shaded area */}
                         <Area
