@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     APP_NAME: str = "E-Commerce Analytics"
     ENVIRONMENT: str = "development"
     SECRET_KEY: str = "change-this-in-production"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
 
     # ── Database ──────────────────────────────────────────────────────
     # This reads DATABASE_URL from your .env file automatically.
@@ -16,7 +18,7 @@ class Settings(BaseSettings):
     # ── Redis ─────────────────────────────────────────────────────────
     REDIS_URL: str = "redis://localhost:6379/0"
 
-    # ── OpenAI (Week 4) ───────────────────────────────────────────────
+    # ── OpenAI () ───────────────────────────────────────────────
     OPENAI_API_KEY: str = ""
     OLLAMA_BASE_URL: str = "http://localhost:11434"
 
@@ -26,6 +28,7 @@ class Settings(BaseSettings):
     env_file="../.env",
     env_file_encoding="utf-8",
     extra="ignore",    # ignore .env values not defined in this class
+
 )
 
 
