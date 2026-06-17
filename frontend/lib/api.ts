@@ -98,14 +98,28 @@ export const analyticsApi = {
     },
 };  
 
+export interface ProductCreate {
+    sku: string;
+    name: string;
+    price: number;
+    cost: number;
+    stock_qty: number;
+}
+
 export const productsApi = {
     getProducts: async (skip = 0, limit = 20): Promise<Product[]> => {
         const response = await apiClient.get('/products', {
             params: { skip, limit },
         });
         return response.data;
-    }
+    },
+
+    createProduct: async (product: ProductCreate): Promise<Product> => {
+        const response = await apiClient.post('/products/', product);
+        return response.data;
+    },
 };
+
 
 export interface ChatMessage {
     role: 'user' | 'assistant';

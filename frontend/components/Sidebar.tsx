@@ -4,10 +4,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 
-const navItems = [
+interface NavItem {
+    href: string;
+    label: string;
+    roles?: string[]; // if omitted, visible to all logged-in roles
+}
+
+const navItems: NavItem[] = [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/products', label: 'Products' },
-    { href: '/forecasting', label: 'Forecasting' },
+    { href: '/forecasting', label: 'Forecasting', roles: ['admin', 'analyst'] },
     { href: '/chat', label: 'AI Chat' },
 ];
 
@@ -17,6 +23,10 @@ export default function Sidebar() {
 
     if (pathname === '/login') return null;
 
+    const visibleItems = navItems.filter(
+        (item) => !item.roles || (user && item.roles.includes(user.role))
+    );
+
     return (
         <aside className="w-56 bg-white border-r border-gray-200 flex flex-col">
             <div className="h-14 flex items-center px-5 border-b border-gray-200">
@@ -24,7 +34,7 @@ export default function Sidebar() {
             </div>
 
             <nav className="flex-1 p-3 space-y-1">
-                {navItems.map((item) => (
+                {visibleItems.map((item) => (
                     <Link
                         key={item.href}
                         href={item.href}
