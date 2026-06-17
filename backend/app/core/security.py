@@ -33,3 +33,28 @@ async def get_current_user (token: str = Depends(oauth2_scheme), db: AsyncSessio
         detail="Invalid or expired token",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+
+    result = await db.execute(select(User).where(User.username == username))
+    user = result.scalar_one_or_none()
+
+    if user is None or not user.is_active:
+        raise credentials_exception
+    return user
+
+def require_role(*roles: str):
+    """Use this to restrict endpoints by roles"""
+    async def role_checker(current_user: User = Depends(get_current_user)) -> User:
+        if current_user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access restricted. Required role: {', '.join(roles)}"
+            )
+        return(current_user)
+    return(role_checker)
