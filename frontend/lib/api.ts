@@ -178,3 +178,43 @@ export const forecastApi = {
         return response.data;
     },
 };
+
+export interface LoginRequest {
+    username: string;
+    password: string;
+}
+
+export interface AuthResponse {
+    access_token: string;
+    token_type: string;
+    username: string;
+    role: string;
+}
+
+export interface CurrentUser {
+    id: number;
+    username: string;
+    role: string;
+    is_active: boolean;
+}
+
+export const authApi = {
+    login: async (username: string, password: string): Promise<AuthResponse> => {
+        const response = await apiClient.post('/auth/login', { username, password });
+        return response.data;
+    },
+
+    register: async (username: string, password: string): Promise<AuthResponse> => {
+        const response = await apiClient.post('/auth/register', { username, password });
+        return response.data;
+    },
+
+    getMe: async (): Promise<CurrentUser> => {
+        const response = await apiClient.get('/auth/me');
+        return response.data;
+    },
+
+    logout: (): void => {
+        clearToken();
+    },
+};
