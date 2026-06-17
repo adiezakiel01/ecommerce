@@ -1,6 +1,8 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 class Settings(BaseSettings):
     # ── App ───────────────────────────────────────────────────────────
@@ -25,7 +27,7 @@ class Settings(BaseSettings):
     # This tells pydantic-settings to look for a .env file
     # SettingsConfigDict replaces the old class Config approach
     model_config = SettingsConfigDict(
-    env_file="../.env",
+    env_file= BASE_DIR / ".env",
     env_file_encoding="utf-8",
     extra="ignore",    # ignore .env values not defined in this class
 

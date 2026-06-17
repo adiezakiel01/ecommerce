@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.core.database import engine # Import the database engine to ensure models are registered
-from app.models.base import Base # Import the Base class to create tables
-from app.models import ecom # Import the ecom models to ensure they are registered with SQLAlchemy
-from app.api.v1.router import api_router # Import the API router to include in the 
+from app.core.database import engine 
+from app.models.base import Base 
+from app.models import ecom 
+from app.models import user
+from app.api.v1.router import api_router 
 from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager

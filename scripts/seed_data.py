@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from app.models.base import Base
 from app.models.ecom import Product, Customer, Order, OrderItem
 
+
 fake = Faker() 
 random.seed(42)
 np.random.seed(42)
@@ -196,6 +197,7 @@ async def main():
     session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with session_factory() as session:
+
         await seed(session)
             
     await engine.dispose()

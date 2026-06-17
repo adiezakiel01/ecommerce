@@ -5,6 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import pandas as pd
 from prophet import Prophet
 
+from app.core.security import require_role
+from app.models.user import User
+
 from app.core.database import get_db
 from app.models.ecom import Order
 
@@ -14,6 +17,7 @@ router = APIRouter()
 async def forecast_revenue(
     forecast_days: int = Query(default=30, ge=7, le=90, description="Number of days to forecast into the future"),
     history_days: int = Query(default=365, ge=90, le=730, description="Number of days of history to use for training the model"),
+    current_user: User = Depends(require_role("admin", "analyst")),
     db: AsyncSession = Depends(get_db),
 ):
     """

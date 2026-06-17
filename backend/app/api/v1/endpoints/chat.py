@@ -10,6 +10,8 @@ from langchain.schema import HumanMessage, SystemMessage
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models.user import User
 
 router = APIRouter()
 
@@ -90,6 +92,7 @@ Just the raw JSON object:
 @router.post("/message", response_model=ChatResponse)
 async def chat_message(
     request: ChatRequest,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """

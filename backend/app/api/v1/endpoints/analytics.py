@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.models.ecom import Order
+from app.core.security import get_current_user
+from app.models.user import User
 
 router = APIRouter()
 
@@ -13,6 +15,7 @@ router = APIRouter()
 async def get_revenue(
     granularity: Literal["day", "week", "month"] = Query(default="day", description="Group revenue by day, week, or month"),
     days: int = Query(default=90, ge=7, le=730, description="Number of past days to include in the revenue calculation"),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     start_date = date.today() - timedelta(days=days)
@@ -52,6 +55,7 @@ async def get_revenue(
 @router.get("/summary")
 async def get_summary(
     days: int = Query(default=30, ge=1, le=365),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     today = date.today()
