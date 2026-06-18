@@ -115,9 +115,19 @@ export interface ProductUpdate {
 }
 
 export const productsApi = {
-    getProducts: async (skip = 0, limit = 20): Promise<Product[]> => {
+    getProducts: async (
+        skip = 0,
+        limit = 20,
+        search?: string,
+        isActive?: boolean
+    ): Promise<Product[]> => {
         const response = await apiClient.get('/products', {
-            params: { skip, limit },
+            params: {
+                skip,
+                limit,
+                ...(search ? { search } : {}),
+                ...(isActive !== undefined ? { is_active: isActive } : {}),
+            },
         });
         return response.data;
     },

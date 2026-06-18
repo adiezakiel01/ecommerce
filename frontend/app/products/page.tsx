@@ -1,23 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { productsApi, Product, ProductCreate, ProductUpdate } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+
+type StatusFilter = "active" | "inactive" | "all";
 
 export default function ProductsPage() {
     const { user } = useAuth();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading]   = useState(true);
     const [skip, setSkip]         = useState(0);
+    const [search, setSearch]     = useState("");
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const limit                   = 20;
 
     const isAdmin = user?.role === "admin";
 
+    const isActiveParam: boolean | undefined =
+    statusFilter === "active" ? true : statusFilter === "inactive" ? false : undefined;
+
     const loadProducts = () => {
         setLoading(true);
-        productsApi.getProducts(skip, limit)
+        productsApi.getProducts(skip, limit, search || undefined, isActiveParam)
             .then(setProducts)
             .catch(console.error)
             .finally(() => setLoading(false));
@@ -26,9 +33,13 @@ export default function ProductsPage() {
     useEffect(() => {
         loadProducts();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [skip]);
+    }, [skip, search, statusFilter]);
 
-    if (loading) {
+    useEffect(() => {
+        setSkip(0); // Reset to first page when search or filter changes
+    }, [search, statusFilter]);
+
+    if (loading && products.length === 0) {
         return (
             <div className="flex items-center justify-center h-full">
                 <p className="text-gray-500">Loading products...</p>
@@ -54,6 +65,26 @@ export default function ProductsPage() {
                     </button>
                 )}
             </div>
+
+            <div className="mb-4 flex items-center gap-3">
+                <input
+                    type="text"
+                    placeholder="Search by name or SKU..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                />
+                <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900"
+                >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+
 
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <table className="w-full text-sm">
