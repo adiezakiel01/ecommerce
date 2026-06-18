@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { productsApi, Product, ProductCreate } from "@/lib/api";
+import { productsApi, Product, ProductCreate, ProductUpdate } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
 export default function ProductsPage() {
@@ -9,7 +9,8 @@ export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading]   = useState(true);
     const [skip, setSkip]         = useState(0);
-    const [showForm, setShowForm] = useState(false);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const limit                   = 20;
 
     const isAdmin = user?.role === "admin";
@@ -46,7 +47,7 @@ export default function ProductsPage() {
                 </div>
                 {isAdmin && (
                     <button
-                        onClick={() => setShowForm(true)}
+                        onClick={() => setShowAddForm(true)}
                         className="text-sm px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
                     >
                         Add Product
@@ -64,6 +65,9 @@ export default function ProductsPage() {
                             <th className="text-right px-4 py-3 text-gray-600 font-medium">Cost</th>
                             <th className="text-right px-4 py-3 text-gray-600 font-medium">Stock</th>
                             <th className="text-center px-4 py-3 text-gray-600 font-medium">Status</th>
+                            {isAdmin && (
+                                <th className="text-right px-4 py-3 text-gray-600 font-medium">Actions</th>
+                            )}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -93,6 +97,16 @@ export default function ProductsPage() {
                                         {product.is_active ? "Active" : "Inactive"}
                                     </span>
                                 </td>
+                                {isAdmin && (
+                                    <td className="px-4 py-3 text-right">
+                                        <button
+                                            onClick={() => setEditingProduct(product)}
+                                            className="text-xs text-gray-500 hover:text-gray-900 underline"
+                                        >
+                                            Edit
+                                        </button>
+                                    </td>
+                                )}
                             </tr>
                         ))}
                     </tbody>
@@ -119,11 +133,22 @@ export default function ProductsPage() {
                 </div>
             </div>
 
-            {showForm && (
+            {showAddForm && (
                 <AddProductModal
-                    onClose={() => setShowForm(false)}
+                    onClose={() => setShowAddForm(false)}
                     onCreated={() => {
-                        setShowForm(false);
+                        setShowAddForm(false);
+                        loadProducts();
+                    }}
+                />
+            )}
+
+            {editingProduct && (
+                <EditProductModal
+                    product={editingProduct}
+                    onClose={() => setEditingProduct(null)}
+                    onUpdated={() => {
+                        setEditingProduct(null);
                         loadProducts();
                     }}
                 />
@@ -240,6 +265,126 @@ function AddProductModal({
                             className="flex-1 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50"
                         >
                             {submitting ? "Creating..." : "Create"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+function EditProductModal({
+    product,
+    onClose,
+    onUpdated,
+}: {
+    product: Product;
+    onClose: () => void;
+    onUpdated: () => void;
+}) {
+    const [form, setForm] = useState<ProductUpdate>({
+        name: product.name,
+        price: parseFloat(product.price),
+        cost: parseFloat(product.cost),
+        stock_qty: product.stock_qty,
+        is_active: product.is_active,
+    });
+    const [error, setError] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setSubmitting(true);
+        try {
+            await productsApi.updateProduct(product.id, form);
+            onUpdated();
+        } catch (err) {
+            console.error(err);
+            setError("Failed to update product. Check the fields and try again.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md">
+                <h2 className="text-lg font-semibold text-gray-900 mb-1">Edit Product</h2>
+                <p className="text-xs text-gray-400 font-mono mb-4">{product.sku}</p>
+                <form onSubmit={handleSubmit} className="space-y-3">
+                    <div>
+                        <label className="block text-sm text-gray-700 mb-1">Name</label>
+                        <input
+                            type="text"
+                            value={form.name}
+                            onChange={(e) => setForm({ ...form, name: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            required
+                        />
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                        <div>
+                            <label className="block text-sm text-gray-700 mb-1">Price</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={form.price}
+                                onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm text-gray-700 mb-1">Cost</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={form.cost}
+                                onChange={(e) => setForm({ ...form, cost: parseFloat(e.target.value) })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm text-gray-700 mb-1">Stock</label>
+                            <input
+                                type="number"
+                                value={form.stock_qty}
+                                onChange={(e) => setForm({ ...form, stock_qty: parseInt(e.target.value) })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="is_active"
+                            checked={form.is_active}
+                            onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
+                            className="rounded border-gray-300"
+                        />
+                        <label htmlFor="is_active" className="text-sm text-gray-700">Active</label>
+                    </div>
+
+                    {error && <p className="text-sm text-red-600">{error}</p>}
+
+                    <div className="flex gap-2 pt-2">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="flex-1 py-2 text-sm border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={submitting}
+                            className="flex-1 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50"
+                        >
+                            {submitting ? "Saving..." : "Save Changes"}
                         </button>
                     </div>
                 </form>
