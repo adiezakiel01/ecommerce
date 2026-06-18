@@ -105,6 +105,14 @@ export interface ProductCreate {
     cost: number;
     stock_qty: number;
 }
+export interface ProductUpdate {
+    name?: string;
+    description?: string;
+    price?: number;
+    cost?: number;
+    stock_qty?: number;
+    is_active?: boolean;
+}
 
 export const productsApi = {
     getProducts: async (skip = 0, limit = 20): Promise<Product[]> => {
@@ -116,6 +124,11 @@ export const productsApi = {
 
     createProduct: async (product: ProductCreate): Promise<Product> => {
         const response = await apiClient.post('/products/', product);
+        return response.data;
+    },
+
+    updateProduct: async (id: string, product: ProductUpdate): Promise<Product> => {
+        const response = await apiClient.patch(`/products/${id}`, product);
         return response.data;
     },
 };
