@@ -96,7 +96,7 @@ export default function ChatPage() {
                                 ? "bg-white border border-gray-200"
                                 : "bg-violet-600 text-white"
                         }`}>
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
                                 {msg.content}
                             </p>
 
@@ -243,7 +243,7 @@ export default function ChatPage() {
                         onChange={e => setInput(e.target.value)}
                         onKeyDown={e => e.key === "Enter" && sendMessage(input)}
                         placeholder="Ask anything about your data..."
-                        className="flex-1 px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
+                        className="flex-1 px-4 py-2.5 text-sm text-gray-600 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
                         disabled={loading}
                     />
                     <button
