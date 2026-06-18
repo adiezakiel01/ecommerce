@@ -1,6 +1,6 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from app.core.database import get_db
@@ -14,8 +14,30 @@ router = APIRouter()
 
 # List products with pagination
 @router.get("/", response_model=List[ProductRead])
-async def list_products(skip: int = 0, limit: int = 20,  current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Product).where(Product.is_active).offset(skip).limit(min(limit,100)).order_by(Product.created_at.desc()))
+async def list_products(
+    skip: int = 0,
+    limit: int = 20,
+    search: str | None = Query(default=None, description="Search by product name or SKU"),
+    is_active: bool | None = Query(default=None, description="Filter by active status. Omit to show all."),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(Product)
+
+    if is_active is not None:
+        query = query.where(Product.is_active == is_active)
+
+    if search:
+        query = query.where(
+            or_(
+                Product.name.ilike(f"%{search}%"),
+                Product.sku.ilike(f"%{search}%"),
+            )
+        )
+
+    query = query.offset(skip).limit(min(limit, 100)).order_by(Product.created_at.desc())
+
+    result = await db.execute(query)
     products = result.scalars().all()
     return products
 

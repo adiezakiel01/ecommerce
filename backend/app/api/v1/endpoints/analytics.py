@@ -8,6 +8,7 @@ from app.core.database import get_db
 from app.models.ecom import Order
 from app.core.security import get_current_user
 from app.models.user import User
+from app.core.analytics_utils import get_latest_data_date
 
 router = APIRouter()
 
@@ -58,11 +59,11 @@ async def get_summary(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    today = date.today()
+    today = await get_latest_data_date(db)
     start_date = today - timedelta(days=days)
     prev_start = start_date - timedelta(days=days)
 
-    async def fetch_period(from_date, to_date):            
+    async def fetch_period(from_date, to_date):
         result = await db.execute(
             select(
                 func.coalesce(func.sum(Order.total_amount), 0).label("revenue"),
@@ -73,18 +74,19 @@ async def get_summary(
                     Order.status != "cancelled",
                     Order.created_at >= from_date,
                     Order.created_at < to_date,
-                    )
                 )
+            )
         )
         return result.one()
+
     current = await fetch_period(start_date, today)
     previous = await fetch_period(prev_start, start_date)
 
     def pct_change(current, previous):
         if previous == 0:
-            return None  
+            return None
         return round(((current - previous) / previous) * 100, 1)
-    
+
     return {
         "period_days": days,
         "current": {
