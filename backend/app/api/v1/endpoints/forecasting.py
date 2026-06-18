@@ -10,6 +10,7 @@ from app.models.user import User
 
 from app.core.database import get_db
 from app.models.ecom import Order
+from app.core.analytics_utils import get_latest_data_date
 
 router = APIRouter()
 
@@ -31,7 +32,8 @@ async def forecast_revenue(
     The confidence bands (upper and lower) are included in the forecast to provide an estimate of the uncertainty in the predictions. The wider the bands, the less certain the forecast is.
     """
 
-    start_date = date.today() - timedelta(days=history_days)
+    latest = await get_latest_data_date(db)
+    start_date = latest - timedelta(days=history_days)
 
     result = await db.execute(
         select(

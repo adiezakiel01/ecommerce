@@ -19,7 +19,8 @@ async def get_revenue(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    start_date = date.today() - timedelta(days=days)
+    latest = await get_latest_data_date(db)
+    start_date = latest - timedelta(days=days)
 
     trunc = func.date_trunc(granularity, Order.created_at).label("period")
 
@@ -47,7 +48,7 @@ async def get_revenue(
                 "date": row.period.strftime("%Y-%m-%d"),
                 "revenue": round(float(row.revenue), 2),
                 "order_count": row.order_count,
-                "avg_order_value": round(float(row.avg_order_value),2),
+                "avg_order_value": round(float(row.avg_order_value), 2),
             }
             for row in rows
         ],
